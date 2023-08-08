@@ -14,25 +14,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
-public class RegisterMemberService {
+@RequiredArgsConstructor
+public class RegisterMemberService {	
 	Logger logger = LoggerFactory.getLogger(RegisterMemberService.class);
+	
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;    
-	
-    public RegisterMemberService(MemberRepository memberRepository,
-    							 PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Transactional
     public MemberDto join(MemberDto dto) {    	
     	Set<RoleType> roles = new HashSet<>();
     	roles.add(RoleType.USER);
-		roles.add(RoleType.MANAGER);		
-		
+    	
         Member member = Member.builder()
         	.username(dto.username())
         	.password(passwordEncoder.encode(dto.password()))
@@ -62,8 +58,10 @@ public class RegisterMemberService {
 	}
     
     @Transactional
-    public MemberDto searchMember(String username) {
-    	Member member = memberRepository.findByUsername(username).orElse(null);    	
-    	return member != null ? MemberDto.createUserDto(member) : null;
-    }
+    public Long searchMember(String username) {
+    	Member member = memberRepository.findByUsername(username).orElse(null);
+    	if (member == null) 
+    		return 0L;
+    	return member.getId();
+    }   
 }

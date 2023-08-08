@@ -4,6 +4,7 @@ import org.gigsoft.secondoblog.dto.MemberDto;
 import org.gigsoft.secondoblog.model.KakaoProfile;
 import org.gigsoft.secondoblog.model.OAuthToken;
 import org.gigsoft.secondoblog.service.RegisterMemberService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,7 +87,10 @@ public class UserController {
 		body.add("redirect_uri", "http://localhost:8000/auth/kakao/callback");
 		body.add("code", code);
 		
-		HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
+		JSONObject jsonObject = new JSONObject(body);
+		System.out.println(jsonObject.toString());
+		
+		HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);		
 		
 		ResponseEntity<?> response = rt.exchange(
 			"https://kauth.kakao.com/oauth/token",
@@ -120,7 +124,7 @@ public class UserController {
 		headers.add("Authorization", "Bearer " + accessToken);
 		headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");		
 		
-		HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest = new HttpEntity<>(headers);
+		HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest = new HttpEntity<>(headers);		
 		
 		ResponseEntity<?> response = rt.exchange(
 			"https://kapi.kakao.com/v2/user/me",
@@ -159,7 +163,7 @@ public class UserController {
 			.oauth("kakao")
 			.build();		
 		
-		if (registerMemberService.searchMember(dto.username()) == null) {
+		if (registerMemberService.searchMember(dto.username()) == 0L) {
 			logger.info("{} 사용자가 없습니다.", dto.username());
 			registerMemberService.join(dto);			
 		}
@@ -168,13 +172,13 @@ public class UserController {
 	}	
 	
 	public void login(HttpServletRequest req, String username, String password) { 
-	    UsernamePasswordAuthenticationToken authReq
-	      = new UsernamePasswordAuthenticationToken(username, password);
-	    Authentication authentication = authenticationManager.authenticate(authReq);
-	    
-	    SecurityContext securityContext = SecurityContextHolder.getContext();
-	    securityContext.setAuthentication(authentication);
-	    HttpSession session = req.getSession(true);
-	    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+    UsernamePasswordAuthenticationToken authReq
+      = new UsernamePasswordAuthenticationToken(username, password);
+    Authentication authentication = authenticationManager.authenticate(authReq);
+    
+    SecurityContext securityContext = SecurityContextHolder.getContext();
+    securityContext.setAuthentication(authentication);
+    HttpSession session = req.getSession(true);
+    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
 	}
 }

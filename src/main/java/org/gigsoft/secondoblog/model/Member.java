@@ -69,13 +69,13 @@ public class Member {
 		Timestamp createdDate = new Timestamp(System.currentTimeMillis());
 		log.info("createUser(): {}", dto.password());
 		
-        return Member.builder()
-        		.username(dto.username())
-        		.password(dto.password())
-        		.email(dto.email())
-        		.oauth(dto.oauth())
-        		.roles(dto.roles())
-        		.createdDate(createdDate)
-        		.build();
+		return Member.builder()
+    		.username(dto.username())
+    		.password(dto.password())
+    		.email(dto.email())
+    		.oauth(dto.oauth())
+    		.roles(dto.roles())
+    		.createdDate(createdDate)
+    		.build();
     }
 }

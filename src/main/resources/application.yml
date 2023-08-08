@@ -1,6 +1,43 @@
+server:
+  port: 8000
+  servlet:    
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    context-path: /
+    
 spring:
-  datasource:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+  datasource:    
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Seoul
     username: Oogway
-    password: Oogway
+    password: Oogway    
+    
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl      
+    show-sql: false
+    properties:
+      hibernate:
+        "[format_sql]": true
+#    defer-datasource-initialization: true
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+                 
+#  sql:
+#    init:
+#      data-locations: classpath*:data.sql
+#      mode: always      
+gig:
+  key: gig1234

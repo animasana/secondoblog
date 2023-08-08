@@ -1,5 +1,7 @@
 package org.gigsoft.secondoblog.config;
 
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -20,19 +24,26 @@ public class SecurityConfig {
 	
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
 	
+	private static final String[] PERMIT_ALL_PATTERNS = new String[] {
+		"/**", "/user/**", "/js/**", "/image/**",
+		"/auth/kakao/callback",
+		"/login/kakao",
+		"/user/join/process", "/user/login/process",		
+		"/board/**"		
+	};		
+	
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {		
 		http
 			.csrf(CsrfConfigurer::disable)
 			.cors(cors -> cors.disable())
 	        .authorizeHttpRequests(authz -> 
 	        	authz
-	        		.requestMatchers("/**", "/user/**", "/js/**", "/image/**").permitAll()
-	        		.requestMatchers("/auth/kakao/callback").permitAll()
-	        		.requestMatchers("/login/kakao").permitAll()
-	        		.requestMatchers("/user/join/process", "/user/login/process").permitAll()	        		
-	        		.requestMatchers("/dummy/**").permitAll()
-	        		.requestMatchers("/board/**").permitAll()
+	        		.requestMatchers(
+	        			Stream.of(PERMIT_ALL_PATTERNS)
+	        			      .map(AntPathRequestMatcher::antMatcher)
+	        			      .toArray(AntPathRequestMatcher[]::new)
+	        		).permitAll()
 	        		.anyRequest().authenticated()	        
 	        )
 	        .formLogin(formLogin -> 
@@ -45,7 +56,6 @@ public class SecurityConfig {
 	        		.permitAll()
 	        )
 	        .userDetailsService(userDetailsServiceImpl)
-//	        .logout(Customizer.withDefaults())
 	        .logout(logout -> 
 	        	logout
 	        		.logoutSuccessUrl("/")

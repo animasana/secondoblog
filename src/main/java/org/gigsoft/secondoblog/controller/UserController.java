@@ -1,7 +1,5 @@
 package org.gigsoft.secondoblog.controller;
 
-import org.gigsoft.secondoblog.config.UserDetailsImpl;
-import org.gigsoft.secondoblog.config.UserDetailsServiceImpl;
 import org.gigsoft.secondoblog.dto.MemberDto;
 import org.gigsoft.secondoblog.model.KakaoProfile;
 import org.gigsoft.secondoblog.model.OAuthToken;
@@ -32,13 +30,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 // 인증이 안된 사용자들이 출입할 수 있는 경로로 /auth/* 허용
 // 그냥 주소가 '/' 이면 index.jsp 허용
 // static 이하에 있는 ./js/*, ./css/*, ./image/*
 
-@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class UserController {
@@ -49,7 +45,6 @@ public class UserController {
 	
 	private final RegisterMemberService registerMemberService;
 	private final AuthenticationManager authenticationManager;
-	private final UserDetailsServiceImpl userDetailsServiceImpl;
 	
 	@GetMapping("/login")
 	public String login() {
@@ -153,12 +148,6 @@ public class UserController {
 	}
 	
 	public void kakaoJoin(KakaoProfile kakaoProfile, HttpServletRequest req) {
-		log.info("카카오 아이디: {}", kakaoProfile.getId());
-		log.info("카카오 이메일: {}", kakaoProfile.getKakaoAccount().getEmail());
-		
-		log.info("블로그 서버 유저네임: {}", kakaoProfile.getKakaoAccount().getEmail() + kakaoProfile.getId());
-		log.info("블로그 서버 이메일: {}", kakaoProfile.getKakaoAccount().getEmail());
-		
 		String username = kakaoProfile.getKakaoAccount().getEmail() + "_" + kakaoProfile.getId();
 		String password = gigKey;
 		String email = kakaoProfile.getKakaoAccount().getEmail();
@@ -174,22 +163,6 @@ public class UserController {
 			logger.info("{} 사용자가 없습니다.", dto.username());
 			registerMemberService.join(dto);			
 		}
-		
-//		UserDetailsImpl userDetailsImpl = userDetailsServiceImpl.loadUserByUsername(dto.username());
-//		logger.info("userDetailsImpl.password(): {}", userDetailsImpl.getPassword());
-//		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetailsImpl, userDetailsImpl, userDetailsImpl.getAuthorities());
-//		SecurityContext sc = SecurityContextHolder.getContext();
-//		sc.setAuthentication(authentication);
-//		HttpSession session = req.getSession(true);
-//		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
-//		logger.info("isAuthenticated(): {}", SecurityContextHolder.getContext().getAuthentication().isAuthenticated());		
-		
-		
-//		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, gigKey));
-//		SecurityContext sc = SecurityContextHolder.getContext();
-//		sc.setAuthentication(authentication);
-//		HttpSession session = req.getSession(true);
-//		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
 		
 		login(req, username, password);
 	}	

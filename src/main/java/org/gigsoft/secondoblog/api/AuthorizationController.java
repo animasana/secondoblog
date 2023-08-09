@@ -8,15 +8,20 @@ import org.gigsoft.secondoblog.service.RegisterMemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 //import jakarta.servlet.http.HttpSession;
@@ -28,6 +33,7 @@ public class AuthorizationController {
 	
 	private final RegisterMemberService registerMemberService;
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
+	private final AuthenticationManager authenticationManager;
 	
 	@PostMapping("/user/join/process")
 	public ResponseEntity<ResponseDto<MemberDto>> join(@RequestBody MemberDto dto) {
@@ -46,10 +52,10 @@ public class AuthorizationController {
 	}
 	
 	@PutMapping("/user/info")
-	public ResponseEntity<?> update(@RequestBody MemberDto dto, @AuthenticationPrincipal UserDetailsImpl customUserDetails) {
+	public ResponseEntity<?> update(@RequestBody MemberDto dto) {
 		try {
 			MemberDto updatedDto = registerMemberService.update(dto);
-			resetSession(dto);
+			resetSession2(dto);
 			
 			ResponseDto<?> responseDto = ResponseDto.<MemberDto>builder()
 					.message("Update Success!!")
@@ -66,7 +72,27 @@ public class AuthorizationController {
 	private void resetSession(MemberDto dto) {
 		UserDetailsImpl userDetailsImpl = userDetailsServiceImpl.loadUserByUsername(dto.username());
 		logger.info("userDetailsImpl.password(): {}", userDetailsImpl.getPassword());
+		logger.info("dto password: {}", dto.password());
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetailsImpl, userDetailsImpl, userDetailsImpl.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+	
+	private void resetSession2(MemberDto dto) {		
+		Authentication authReq = new UsernamePasswordAuthenticationToken(dto.username(), dto.password());
+		Authentication authentication = authenticationManager.authenticate(authReq);		
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+	
+	
+	
+	public void login(HttpServletRequest req, String username, String password) { 
+    UsernamePasswordAuthenticationToken authReq
+      = new UsernamePasswordAuthenticationToken(username, password);
+    Authentication authentication = authenticationManager.authenticate(authReq);
+    
+    SecurityContext securityContext = SecurityContextHolder.getContext();
+    securityContext.setAuthentication(authentication);
+    HttpSession session = req.getSession(true);
+    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);    
 	}
 }

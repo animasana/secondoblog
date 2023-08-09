@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,6 +47,7 @@ public class UserController {
 	
 	private final RegisterMemberService registerMemberService;
 	private final AuthenticationManager authenticationManager;
+	private final PasswordEncoder passwordEncoder;
 	
 	@GetMapping("/login")
 	public String login() {
@@ -168,6 +170,7 @@ public class UserController {
 			registerMemberService.join(dto);			
 		}
 		
+		logger.info("[password]: {}", password);		
 		login(req, username, password);
 	}	
 	

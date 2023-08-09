@@ -179,6 +179,6 @@ public class UserController {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     securityContext.setAuthentication(authentication);
     HttpSession session = req.getSession(true);
-    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);    
 	}
 }

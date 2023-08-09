@@ -52,13 +52,13 @@ public class SecurityConfig {
 	        		.loginProcessingUrl("/user/login/process")
 	        		.usernameParameter("username")
 	        		.passwordParameter("password")
-	        		.defaultSuccessUrl("/login", true)	        		
+	        		.defaultSuccessUrl("/", true)	        		
 	        		.permitAll()
 	        )
 	        .userDetailsService(userDetailsServiceImpl)
 	        .logout(logout -> 
 	        	logout
-	        		.logoutSuccessUrl("/")
+	        		.logoutSuccessUrl("/login")
 	        		.invalidateHttpSession(true)
 	        		.deleteCookies("JSESSIONID")
 	        );

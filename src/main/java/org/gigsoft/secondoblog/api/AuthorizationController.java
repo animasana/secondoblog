@@ -1,7 +1,6 @@
 package org.gigsoft.secondoblog.api;
 
 import org.gigsoft.secondoblog.config.UserDetailsImpl;
-import org.gigsoft.secondoblog.config.UserDetailsServiceImpl;
 import org.gigsoft.secondoblog.dto.MemberDto;
 import org.gigsoft.secondoblog.dto.ResponseDto;
 import org.gigsoft.secondoblog.service.RegisterMemberService;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -32,7 +30,7 @@ public class AuthorizationController {
 	private final Logger logger = LoggerFactory.getLogger(AuthorizationController.class);	
 	
 	private final RegisterMemberService registerMemberService;
-	private final UserDetailsServiceImpl userDetailsServiceImpl;
+//	private final UserDetailsServiceImpl userDetailsServiceImpl;
 	private final AuthenticationManager authenticationManager;
 	
 	@PostMapping("/user/join/process")
@@ -55,7 +53,7 @@ public class AuthorizationController {
 	public ResponseEntity<?> update(@RequestBody MemberDto dto) {
 		try {
 			MemberDto updatedDto = registerMemberService.update(dto);
-			resetSession2(dto);
+			resetSession(dto);
 			
 			ResponseDto<?> responseDto = ResponseDto.<MemberDto>builder()
 					.message("Update Success!!")
@@ -69,25 +67,15 @@ public class AuthorizationController {
 		}		
 	}
 	
-	private void resetSession(MemberDto dto) {
-		UserDetailsImpl userDetailsImpl = userDetailsServiceImpl.loadUserByUsername(dto.username());
-		logger.info("userDetailsImpl.password(): {}", userDetailsImpl.getPassword());
-		logger.info("dto password: {}", dto.password());
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetailsImpl, userDetailsImpl, userDetailsImpl.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
-	
-	private void resetSession2(MemberDto dto) {		
+	private void resetSession(MemberDto dto) {		
 		Authentication authReq = new UsernamePasswordAuthenticationToken(dto.username(), dto.password());
-		Authentication authentication = authenticationManager.authenticate(authReq);		
+		Authentication authentication = authenticationManager.authenticate(authReq);
+		logger.info("getPrincipal(): {}", ((UserDetailsImpl) authentication.getPrincipal()).getEmail());
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
-	
-	
+	}	
 	
 	public void login(HttpServletRequest req, String username, String password) { 
-    UsernamePasswordAuthenticationToken authReq
-      = new UsernamePasswordAuthenticationToken(username, password);
+    Authentication authReq = new UsernamePasswordAuthenticationToken(username, password);
     Authentication authentication = authenticationManager.authenticate(authReq);
     
     SecurityContext securityContext = SecurityContextHolder.getContext();

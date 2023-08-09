@@ -17,8 +17,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,7 +45,6 @@ public class UserController {
 	
 	private final RegisterMemberService registerMemberService;
 	private final AuthenticationManager authenticationManager;
-	private final PasswordEncoder passwordEncoder;
 	
 	@GetMapping("/login")
 	public String login() {
@@ -175,13 +172,12 @@ public class UserController {
 	}	
 	
 	public void login(HttpServletRequest req, String username, String password) { 
-    UsernamePasswordAuthenticationToken authReq
-      = new UsernamePasswordAuthenticationToken(username, password);
+    Authentication authReq = new UsernamePasswordAuthenticationToken(username, password);
     Authentication authentication = authenticationManager.authenticate(authReq);
     
     SecurityContext securityContext = SecurityContextHolder.getContext();
     securityContext.setAuthentication(authentication);
     HttpSession session = req.getSession(true);
-    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);    
+    session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);    
 	}
 }
